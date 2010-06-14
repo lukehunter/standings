@@ -1,0 +1,9 @@
+{% if team_list %}
+   <ul>
+   {% for team in team_list %}
+      <li><a href="http://sports.yahoo.com/mlb/teams/{{ team.abbrev }}/">{{ team.city }} {{ team.name }}</a></li>
+   {% endfor %}
+   </ul>
+{% else %}
+   <p>No teams found.</p>
+{% endif %}
