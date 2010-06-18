@@ -3,3 +3,15 @@ http://software.lukehunter.net/node/17
 
 design:
 python + django + beautiful soup
+
+getScores(date) -- scrape current scores from mlb scoreboard for given date. return array of tuple of ((team1, score1), (team2, score2) where scores are empty strings for games that have not yet started
+
+getRecords() -- scrape standings for wins/losses/streak/last 10. return array of tuples (team, wins, losses, streak, last 10)
+
+scraping strategy:
+
+every 30 seconds: get today's scores and fill relevant teams' info.
+once a day: for teams where no games are found today, check the next day. continue until november 10th is hit or all teams have info.
+
+limitations:
+if a game runs past midnight (unlikely) its score will be replaced if there is a scheduled game the next day
