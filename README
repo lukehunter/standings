@@ -6,8 +6,6 @@ python + django + beautiful soup
 
 getContests(date) -- scrape current scores from mlb scoreboard for given 
 date. return array of (team1, score1, team2, score2, start_time) tuples 
-where scores are empty strings for games that have not 
-yet started 
 
 getStandings() -- scrape standings for wins/losses/streak/last 10. return array 
 of dictionaries using column headings
