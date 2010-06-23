@@ -4,8 +4,9 @@ http://software.lukehunter.net/node/17
 design:
 python + django + beautiful soup
 
-getContests(date) -- scrape current scores from mlb scoreboard for given 
-date. return array of (team1, score1, team2, score2, start_time) tuples 
+getContests(date) -- scrape contests from mlb scoreboard/schedule for given 
+date. return array of dictionaries (hometeam, homescore, awayteam, awayscore, 
+start_time) 
 
 getStandings() -- scrape standings for wins/losses/streak/last 10. return array 
 of dictionaries using column headings
