@@ -1,21 +1,28 @@
 import re
 from BeautifulSoup import BeautifulSoup, NavigableString
-#from urllib import urlopen
 
-def printScores(soup, findAttrs):
-    curTeam = soup.find(attrs=findAttrs)
-    while(curTeam is not None):
-        if (curTeam.b is not None and curTeam.b.a is not None):
-            teamLink = curTeam.b.a['href']
-            teamname = teamLink.strip()[-3:]
-            print "%s" % (teamname),
-
-            scoreTag = curTeam.findNext('span')
-            if (scoreTag is not None and scoreTag.contents[0].isdigit()):
-                score = scoreTag.contents[0].strip()
-                print "%s" % (score),
-            print ""
-        curTeam = curTeam.findNext(attrs=findAttrs)
+def getContests(soup):
+    results = []
+    result = {}
+    timeRe = re.compile(r"^[0-9]+:[0-9]{2}.*")
+    homeOrAway = "away"
+    for td in soup.findAll(attrs={'class' : re.compile('yspscores')}):
+        if (td.b is not None and td.b.a is not None):
+            result[homeOrAway + "team"] = td.b.a['href'].strip()[-3:]
+            for span in td.findNext('span'):
+                if span.isdigit():
+                    result[homeOrAway + "score"] = span
+                    break
+                else:
+                    if (timeRe.match(span)):
+                        result["start_time"] = span
+            if (homeOrAway == "away"):
+                homeOrAway = "home"
+            else:
+                homeOrAway = "away"
+                results.append(result)
+                result = {}
+    return results
 
 def getStandings(soup):
     results = []
@@ -36,29 +43,36 @@ def getStandings(soup):
             results.append(result)
             rank += 1
     return results
+
+def printDict(d):
+    for key in d.keys():
+        print "%s:%s " % (key, d[key]),
+
+def printDictArr(da):
+    for d in da:
+        printDict(d)
+        print ''
         
 
-##todayScores = open('C:\projects\standings\source\sampledata\mlb-scoreboard.html','r').read()#urlopen('http://sports.yahoo.com/mlb/scoreboard').read()
-##todayScoresSoup = BeautifulSoup(todayScores)
-##findScoreAttrs = {'class' : re.compile('yspscores team')}
-##
-##printScores(todayScoresSoup, findScoreAttrs)
-##
-##print "\n*********************************\n"
-##
-##futureScores = open('c:\projects\standings\source\sampledata\mlb-scoreboard-future.html','r').read()
-##futureScoresSoup = BeautifulSoup(futureScores)
-##findMatchupsAttrs = {'class' : re.compile('yspscores')}
-##
-##printScores(futureScoresSoup, findMatchupsAttrs)
-##
-##print "\n*********************************\n"
+todayScores = open('C:\projects\standings\source\sampledata\mlb-scoreboard.html','r').read()#urlopen('http://sports.yahoo.com/mlb/scoreboard').read()
+todayScoresSoup = BeautifulSoup(todayScores, convertEntities=BeautifulSoup.HTML_ENTITIES)
+todayScoresDictArr = getContests(todayScoresSoup)
+printDictArr(todayScoresDictArr)
 
-standings = open('c:\projects\standings\source\sampledata\mlb-standings.html','r').read()
-standingsSoup = BeautifulSoup(standings, convertEntities=BeautifulSoup.HTML_ENTITIES)
-standingsDictArr = getStandings(standingsSoup)
-for standingsDict in standingsDictArr:
-    for key in standingsDict.keys():
-        print "%s:%s " % (key, standingsDict[key]),
-    print ''
+print "\n*********************************\n"
+
+futureScores = open('c:\projects\standings\source\sampledata\mlb-scoreboard-future.html','r').read()
+futureScoresSoup = BeautifulSoup(futureScores, convertEntities=BeautifulSoup.HTML_ENTITIES)
+futureScoresDictArr = getContests(futureScoresSoup)
+printDictArr(futureScoresDictArr)
+##
+##print "\n*********************************\n"
+##
+##standings = open('c:\projects\standings\source\sampledata\mlb-standings.html','r').read()
+##standingsSoup = BeautifulSoup(standings, convertEntities=BeautifulSoup.HTML_ENTITIES)
+##standingsDictArr = getStandings(standingsSoup)
+##printDictArr(standingsDictArr)
+
+
+    
 
