@@ -26,6 +26,13 @@ class Team(models.Model):
    next_game = models.DateTimeField('next game', blank=True, null=True)
    division = models.ForeignKey(Division)
    
+class Contest(models.Model):
+   hometeam = models.ForeignKey(Team)
+   homescore = models.IntegerField(blank=True, null=True)
+   awayteam = models.ForeignKey(Team)
+   awayscore = models.IntegerField(blank=True, null=True)
+   start_time = models.DateTimeField('start time', blank=True, null=True)
+   
    def win_pct(self):
       return float(self.wins) / (float(self.wins) + float(self.losses))
    def __unicode__(self):

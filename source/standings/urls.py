@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     
     (r'^mlb/$', 'standings.baseball.views.index'),
+    (r'^mlb/scraper/(\w+)/$', 'standings.baseball.views.scraper'),
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
