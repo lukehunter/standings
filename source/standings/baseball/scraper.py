@@ -1,5 +1,10 @@
 import re
 from BeautifulSoup import BeautifulSoup, NavigableString
+from urllib import FancyURLopener
+from datetime import datetime
+
+class MyOpener(FancyURLopener):
+    version = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6'
 
 # returns dictionary with keys: hometeam, homescore, awayteam, awayscore,
 # start_time. if game hasn't started scores will be empty and start_time
@@ -65,38 +70,54 @@ def printDictArr(da):
         printDict(d)
         print ''
 
+def soupify(url):
+    myopener = MyOpener()
+    html = myopener.open(url).read()
+    soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES)
+    return soup
+
+def getScoreboard(urlParams=""):
+    url = 'http://sports.yahoo.com/mlb/scoreboard%s' % urlParams
+    scoreboardSoup = soupify(url)
+    scoreboardDictArr = getContests(scoreboardSoup)
+    return scoreboardDictArr
+
 def updateTodayScores():
-    todayScores = open('C:\projects\standings\source\sampledata\mlb-scoreboard.html','r').read()#urlopen('http://sports.yahoo.com/mlb/scoreboard').read()
-    todayScoresSoup = BeautifulSoup(todayScores, convertEntities=BeautifulSoup.HTML_ENTITIES)
-    todayScoresDictArr = getContests(todayScoresSoup)
+    result = []
 
-    for d in todayScoresDictArr:
+    for d in getScoreboard():
         if (d.get('homescore')):
-            print "%s-%s %s" % (d['homescore'], d['awayscore'], d['hometeam'])
-        else:
-            printDict(d)
+            print "Found score: %s-%s %s, updating" % (d['homescore'], d['awayscore'], d['hometeam'])
+            result.append(d)
 
-def scrape():
-    updateTodayScores()
+    return result
 
-scrape()
-    
-##printDictArr(todayScoresDictArr)
-##
-##print "\n*********************************\n"
-##
-##futureScores = open('c:\projects\standings\source\sampledata\mlb-scoreboard-future.html','r').read()
-##futureScoresSoup = BeautifulSoup(futureScores, convertEntities=BeautifulSoup.HTML_ENTITIES)
-##futureScoresDictArr = getContests(futureScoresSoup)
-##printDictArr(futureScoresDictArr)
-##
-##print "\n*********************************\n"
-##
-##standings = open('c:\projects\standings\source\sampledata\mlb-standings.html','r').read()
-##standingsSoup = BeautifulSoup(standings, convertEntities=BeautifulSoup.HTML_ENTITIES)
-##standingsDictArr = getStandings(standingsSoup)
-##printDictArr(standingsDictArr)
-##
-##
-##    
-##
+def updateScheduledContests(date):
+    result = []
+
+    for d in getScoreboard(urlArgFromDate(date)):
+        if (not d.get('homescore')):
+            print "Found scheduled game: %s@%s %s/%s %s" % (d['awayteam'], d['hometeam'], date.month, date.day, d['start_time'])
+            result.append(d)
+
+    return result
+
+def updateStandings():
+    url = 'http://sports.yahoo.com/mlb/standings'
+    standingsSoup = soupify(url)
+    standingsDictArr = getStandings(standingsSoup)
+
+    print "AL West"
+    printDivision(standingsDictArr, "American League", "West")
+
+def printDivision(standings, conference, division):
+    for d in standings:
+        if (d['conference'] == conference and d['div'] == division):
+            print "%s. %s" % (d['rank'], d['team'])
+
+def urlArgFromDate(date):
+    return "?d=%d-%02d-%02d" % (date.year, date.month, date.day)
+
+updateTodayScores()
+updateScheduledContests(datetime(2010, 7, 30))
+updateStandings()
