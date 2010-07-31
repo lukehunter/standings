@@ -1,5 +1,5 @@
 requirements:
-http://software.lukehunter.net/node/17
+http://software.lukehunter.net/node/18
 
 design:
 python + django + beautiful soup
