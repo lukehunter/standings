@@ -1,3 +1,7 @@
+To run django site: install python/django, then run
+'python manage.py runserver'
+in source\standings folder
+
 requirements:
 http://software.lukehunter.net/node/18
 
